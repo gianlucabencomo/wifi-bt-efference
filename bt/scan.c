@@ -26,9 +26,19 @@ int main(int argc, char **argv)
     max_rsp = 255;
     flags = IREQ_CACHE_FLUSH;
     ii = (inquiry_info*)malloc(max_rsp * sizeof(inquiry_info));
+    if (!ii) {
+        perror("malloc");
+        close(sock);
+        exit(1);
+    }
     
     num_rsp = hci_inquiry(dev_id, len, max_rsp, NULL, &ii, flags);
-    if( num_rsp < 0 ) perror("hci_inquiry");
+    if( num_rsp < 0 ) {
+        perror("hci_inquiry");
+        free(ii);
+        close(sock);
+        exit(1);
+    }
 
     for (i = 0; i < num_rsp; i++) {
         ba2str(&(ii+i)->bdaddr, addr);
